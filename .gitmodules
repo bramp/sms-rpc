@@ -1,0 +1,3 @@
+[submodule "libs/NanoHTTPd"]
+	path = libs/NanoHTTPd
+	url = git://github.com/bramp/NanoHTTPd.git

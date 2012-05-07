@@ -1,0 +1,15 @@
+API
+
+Call all APIs as simple HTTP GET, and a JSON object will be returned
+
+Send a SMS
+   /messages/send?to=NNNNNNNNN&text=?????
+   
+List all SMS
+   /messages/list
+   optional arguments
+     older=ID - List all messages older than this ID
+     direction=[mt|mo] - List all MOs, or MTs. Default is MTs.
+     
+An example with curl:
+   curl "http://192.168.0.10:8080/messages/send?to=99222&text=help"

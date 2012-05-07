@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Android SMS RPC (by bramp)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="bootstrap_css.min.css" rel="stylesheet">
+  <link href="bootstrap_responsive_css.min.css" rel="stylesheet">
+  <style>
+
+  .oddrow td {
+  	background-color: whiteSmoke;
+  }
+  .evenrow {
+  	background-color: white;
+  }
+  
+  @media (max-width: 480px) {
+	  body {
+	  	margin:0;
+	  	padding:10px;
+	  }
+	  
+	  .form-horizontal .control-label {
+	  	width: 60px;
+	  }
+	  .form-horizontal .controls {
+	  	margin-left: 70px;
+	  }
+	  .form-horizontal .form-actions {
+	    padding-left: 140px;
+	  }
+
+	  
+  }
+
+  /*
+  @media (min-width: 768px) {
+	  body {
+	  	margin:10px;
+	  	padding:10px;
+	  	max-width: 960px;
+	  }
+	  
+	  .alert {
+	  	margin-left: auto;
+	  	margin-right: auto;
+	  	max-width: 500px;
+	  }
+  }
+  */
+  
+  @media (min-width: 768px) {
+  	#heading {
+  		float: left;
+  		padding-right: 0.5em;
+  	}
+  	#text {
+  		height: 3em;
+  	}
+  }
+  </style>
+
+</head>
+<body>
+<div class="container">
+  <h1 id="heading">Android SMS RPC</h1>
+  <h2>(by bramp)</h2>
+  <form action="messages/send" method="get" class="form-horizontal">
+    <fieldset class="control-group">
+      <legend>Send Messages</legend>
+      <div id="send-alert" class="control-group"></div>
+      <div class="control-group">
+        <label class="control-label" for="to">To</label>
+        <div class="controls">
+        	<input type="text" id="to" name="to"/>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="text">Message</label>
+        <div class="controls">
+        	<textarea id="text" name="text"></textarea>
+        </div>
+      </div>      
+      <div class="form-actions">
+        <button id="send" type="button" class="btn btn-primary">Send</button>
+      </div>
+    </fieldset>
+  </form>
+  
+  <hr />
+  
+  <form action="messages/list" method="get" class="form-horizontal">
+    <fieldset>
+      <legend>List Messages</legend>
+      <table id="messages" class="table">
+      <thead>
+      	<tr><th>id</th><th>date</th><th>to</th></tr>
+      </thead>
+      <tbody>
+      <!--
+      	<tr><td>id</td><td>date</td><td>to</td></tr>
+      	<tr><td colspan="3">message</td></tr>
+      -->
+      </tbody>
+      </table>
+      <ul class="pager hidden">
+		  <li class="previous">
+		    <a href="#">&larr; Older</a>
+		  </li>
+		  <li class="next">
+		    <a href="#">Newer &rarr;</a>
+		  </li>
+		</ul>   
+    </fieldset>
+  </form>
+</div>
+
+  <script src="jquery_1_7_2_js.min.js"></script>
+  <script src="bootstrap_js.min.js"></script>
+  <script src="tmpl_js.js"></script>
+  
+  <script type="text/html" id="alert-message">
+      <div class="alert alert-<%=type%>">
+      	<button class="close" data-dismiss="alert">×</button>
+      	<strong><%=message%></strong>
+      </div>
+  </script>
+
+  <script>
+  var alert = tmpl( $("#alert-message").html() );
+
+  $(function() {
+
+    $('#send').click(function() {
+		var jqxhr = $.ajax( {
+			url: "messages/send",
+			data: {to: $('#to').val(), text: $('#text').val()},
+			dataType: "json",
+			success: function(data) {
+				var msg;
+				if (data.status == "ok") {
+					msg = alert({
+						type: "success",
+						message: "Message was sent!" 
+					});
+				} else {
+					msg = alert({
+						type: "error",
+						message: "Failed to send: " + data.reason
+					});
+				}
+				$('#send-alert').append( msg );
+			},
+			error: function(jqXHR, textStatus, errorThrown) {
+				$('#send-alert').append(
+					alert({
+						type: "error",
+						message: "Failed to send" + (errorThrown ? ": HTTP " + errorThrown : '')
+					})
+				);
+			}
+			
+		});
+    });
+
+    $.get('messages/list', {}, function(data) {
+
+      // TODO check "status" was "ok"
+      
+      var messages = data.messages;
+      var tbody = $('#messages tbody');
+
+      /*
+      tbody.children().fadeOut(500, function() {
+        tbody.empty();
+      });
+      */
+      tbody.empty();
+
+      $.each(messages, function(index, value) {
+          var date = new Date(value.timestamp);
+
+		 // TODO Turn into template
+	      tbody.append(
+		      '<tr class="' + (index % 2 == 0 ? 'oddrow' : 'evenrow') + '">' +
+		        '<td>' + value.id + '</td><td>' + date.toString() + '</td><td>' + value.address + '</td>' +
+		      '</tr>' +
+		      '<tr class="' + (index % 2 == 0 ? 'oddrow' : 'evenrow') + '">' +
+		        '<td colspan="3">' + value.message + '</td>' +
+		      '</tr>'
+		  );   
+      });
+
+    }, 'json');  
+  });
+  
+  </script>
+</body>
+</html>

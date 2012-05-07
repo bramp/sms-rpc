@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Android RPC (by bramp)</string>
 
-    <string name="hello">Hello World, MainActivity!</string>
-    <string name="app_name">sms-rpc</string>
+    <string name="service_started">Android RPC Service was started</string>
+    <string name="service_failed">Android RPC Service failed to start</string>
+    <string name="service_stopped">Android RPC Service was stopped</string>
 
+    <string name="service_enabled">RPC enabled</string>
+    <string name="service_disabled">RPC disabled</string>
 </resources>
